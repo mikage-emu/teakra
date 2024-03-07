@@ -73,6 +73,13 @@ public:
         on_vectored_interrupt = std::move(vectored_interrupt);
     }
 
+    void Reset() {
+        std::lock_guard lock(mutex);
+        request = {};
+        enabled = {};
+        vectored_enabled = {};
+    }
+
     std::array<u16, 16> vector_low, vector_high;
     std::array<u16, 16> vector_context_switch;
 

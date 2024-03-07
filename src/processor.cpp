@@ -4,31 +4,45 @@
 
 namespace Teakra {
 
+std::unique_ptr<ProcessorEngine> CreateInterpreterEngine(CoreTiming& core_timing, struct RegisterState& regs, MemoryInterface& memory_interface) {
+    return std::make_unique<Interpreter>(core_timing, regs, memory_interface);
+}
+
 struct Processor::Impl {
-    Impl(CoreTiming& core_timing, MemoryInterface& memory_interface)
-        : core_timing(core_timing), interpreter(core_timing, regs, memory_interface) {}
+    Impl(CoreTiming& core_timing, MemoryInterface& memory_interface, const ProcessorEngineFactory& engine_factory)
+        : core_timing(core_timing),
+        memory_interface(memory_interface),
+        engine(engine_factory(core_timing, regs, memory_interface))
+        {}
+    virtual ~Impl() = default;
+
     CoreTiming& core_timing;
     RegisterState regs;
-    Interpreter interpreter;
-};
 
-Processor::Processor(CoreTiming& core_timing, MemoryInterface& memory_interface)
-    : impl(new Impl(core_timing, memory_interface)) {}
-Processor::~Processor() = default;
+    MemoryInterface& memory_interface;
+
+    std::unique_ptr<ProcessorEngine> engine;
+};
 
 void Processor::Reset() {
     impl->regs = RegisterState();
+    impl->engine->Reset();
 }
 
+Processor::Processor(CoreTiming& core_timing, MemoryInterface& memory_interface, const ProcessorEngineFactory& engine_factory)
+    : impl(new Impl(core_timing, memory_interface, engine_factory
+    )) {}
+Processor::~Processor() = default;
+
 void Processor::Run(unsigned cycles) {
-    impl->interpreter.Run(cycles);
+    impl->engine->Run(cycles);
 }
 
 void Processor::SignalInterrupt(u32 i) {
-    impl->interpreter.SignalInterrupt(i);
+    impl->engine->SignalInterrupt(i);
 }
 void Processor::SignalVectoredInterrupt(u32 address, bool context_switch) {
-    impl->interpreter.SignalVectoredInterrupt(address, context_switch);
+    impl->engine->SignalVectoredInterrupt(address, context_switch);
 }
 
 } // namespace Teakra

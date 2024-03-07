@@ -27,9 +27,9 @@ struct Teakra::Impl {
     std::array<Btdmp, 2> btdmp{{{core_timing}, {core_timing}}};
     MMIORegion mmio{miu, icu, apbp_from_cpu, apbp_from_dsp, timer, dma, ahbm, btdmp};
     MemoryInterface memory_interface{shared_memory, miu};
-    Processor processor{core_timing, memory_interface};
+    Processor processor;
 
-    Impl() {
+    Impl(const ProcessorEngineFactory& engine_factory) : processor { core_timing, memory_interface, engine_factory } {
         memory_interface.SetMMIO(mmio);
         using namespace std::placeholders;
         icu.SetInterruptHandler(std::bind(&Processor::SignalInterrupt, &processor, _1),
@@ -52,6 +52,7 @@ struct Teakra::Impl {
     void Reset() {
         shared_memory.raw.fill(0);
         miu.Reset();
+        icu.Reset();
         apbp_from_cpu.Reset();
         apbp_from_dsp.Reset();
         timer[0].Reset();
@@ -64,7 +65,7 @@ struct Teakra::Impl {
     }
 };
 
-Teakra::Teakra() : impl(new Impl) {}
+Teakra::Teakra(const ProcessorEngineFactory& engine_factory) : impl(new Impl(engine_factory)) {}
 Teakra::~Teakra() = default;
 
 void Teakra::Reset() {

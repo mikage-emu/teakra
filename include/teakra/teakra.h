@@ -7,6 +7,11 @@
 
 namespace Teakra {
 
+class ProcessorEngine;
+using ProcessorEngineFactory = std::unique_ptr<ProcessorEngine>(*)(class CoreTiming&, struct RegisterState&, class MemoryInterface&);
+
+std::unique_ptr<ProcessorEngine> CreateInterpreterEngine(class CoreTiming&, struct RegisterState&, class MemoryInterface&);
+
 struct AHBMCallback {
     std::function<std::uint8_t(std::uint32_t address)> read8;
     std::function<void(std::uint32_t address, std::uint8_t value)> write8;
@@ -20,7 +25,7 @@ struct AHBMCallback {
 
 class Teakra {
 public:
-    Teakra();
+    Teakra(const ProcessorEngineFactory&);
     ~Teakra();
 
     void Reset();
