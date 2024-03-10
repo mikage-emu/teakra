@@ -2825,7 +2825,7 @@ public:
         CodebookSearch(u, v, r, c);
     }
 
-    constexpr static bool dummy_mma = true;
+    constexpr static bool dummy_mma = false;
 
     void mma(RegName a, bool x0_sign, bool y0_sign, bool x1_sign, bool y1_sign, SumBase base,
              bool sub_p0, bool p0_align, bool sub_p1, bool p1_align) {
