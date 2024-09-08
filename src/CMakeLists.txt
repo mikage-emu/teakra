@@ -42,7 +42,7 @@ create_target_directory_groups(teakra)
 target_link_libraries(teakra PRIVATE Threads::Threads)
 target_include_directories(teakra
                            PUBLIC ../include
-                           PRIVATE .)
+                           PUBLIC .)
 target_compile_options(teakra PRIVATE ${TEAKRA_CXX_FLAGS})
 
 add_library(teakra_c
