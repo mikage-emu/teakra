@@ -75,7 +75,7 @@ public:
                 // Skip additional tick so to let components fire interrupts
                 if (i < cycles - 1) {
                     ++i;
-                    core_timing.Tick();
+                    core_timing.Tick(1);
                 }
             }
 
@@ -147,7 +147,7 @@ public:
                 }
             }
 
-            core_timing.Tick();
+            core_timing.Tick(1);
         }
     }
 

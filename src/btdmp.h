@@ -2,6 +2,7 @@
 #include <array>
 #include <cstdio>
 #include <functional>
+#include <stdexcept>
 #include <utility>
 #include <queue>
 #include "common_types.h"
@@ -68,7 +69,7 @@ public:
         return 0;
     }
 
-    void Tick() override;
+    void Tick(uint32_t cycles) override;
     u64 GetMaxSkip() const override;
     void Skip(u64 ticks) override;
 

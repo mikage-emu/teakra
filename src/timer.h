@@ -21,7 +21,7 @@ public:
     void Reset();
 
     void Restart();
-    void Tick() override;
+    void Tick(uint32_t cycles) override;
     void TickEvent();
     u64 GetMaxSkip() const override;
     void Skip(u64 ticks) override;

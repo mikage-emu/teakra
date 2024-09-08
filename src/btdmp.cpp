@@ -20,30 +20,39 @@ void Btdmp::Reset() {
     transmit_queue = {};
 }
 
-void Btdmp::Tick() {
+void Btdmp::Tick(uint32_t cycles) {
     if (transmit_enable) {
-        ++transmit_timer;
         if (transmit_timer >= transmit_period) {
-            transmit_timer = 0;
-            std::array<std::int16_t, 2> sample;
-            for (int i = 0; i < 2; ++i) {
-                if (transmit_queue.empty()) {
-                    std::printf("BTDMP: transmit buffer underrun\n");
-                    sample[i] = 0;
-                } else {
-                    sample[i] = static_cast<s16>(transmit_queue.front());
-                    transmit_queue.pop();
-                    transmit_empty = transmit_queue.empty();
-                    transmit_full = false;
-                    if (transmit_empty) {
-                        interrupt_handler();
-                    }
-                }
-            }
-            if (audio_callback) {
-                audio_callback(sample);
-            }
+            // TODO: Actually this can probably happen after all
+            throw std::runtime_error("Btdmp invariant violated: timer larger than period!");
         }
+
+        do {
+            auto diff = std::min<uint32_t>(cycles, transmit_period - transmit_timer);
+            transmit_timer += diff;
+            cycles -= diff;
+
+            if (transmit_timer >= transmit_period) {
+                transmit_timer = 0;
+                std::array<std::int16_t, 2> sample;
+                for (int i = 0; i < 2; ++i) {
+                    if (transmit_queue.empty()) {
+                        sample[i] = 0;
+                    } else {
+                        sample[i] = static_cast<s16>(transmit_queue.front());
+                        transmit_queue.pop();
+                        transmit_empty = transmit_queue.empty();
+                        transmit_full = false;
+                        if (transmit_empty) {
+                            interrupt_handler();
+                        }
+                     }
+                 }
+                if (audio_callback) {
+                    audio_callback(sample);
+                }
+             }
+        } while (cycles);
     }
 }
 

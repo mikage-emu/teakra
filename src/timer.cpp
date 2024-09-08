@@ -24,26 +24,34 @@ void Timer::Restart() {
     }
 }
 
-void Timer::Tick() {
+void Timer::Tick(uint32_t cycles) {
     ASSERT(static_cast<u16>(count_mode) < 4);
     ASSERT(scale == 0);
-    if (pause)
-        return;
-    if (count_mode == CountMode::EventCount)
-        return;
-    if (counter == 0) {
-        if (count_mode == CountMode::AutoRestart) {
-            Restart();
-        } else if (count_mode == CountMode::FreeRunning) {
-            counter = 0xFFFFFFFF;
+    do {
+        if (pause)
+            return;
+        if (count_mode == CountMode::EventCount)
+            return;
+        if (counter == 0) {
+            if (count_mode == CountMode::AutoRestart) {
+                --cycles;
+                Restart();
+            } else if (count_mode == CountMode::FreeRunning) {
+                --cycles;
+                counter = 0xFFFFFFFF;
+                UpdateMMIO();
+            } else {
+                cycles = 0;
+            }
+        } else {
+            auto diff = std::min<uint32_t>(counter, cycles);
+            counter -= diff;
+            cycles -= diff;
             UpdateMMIO();
-        }
-    } else {
-        --counter;
-        UpdateMMIO();
-        if (counter == 0)
-            interrupt_handler();
-    }
+            if (counter == 0)
+                interrupt_handler();
+         }
+    } while (cycles);
 }
 
 void Timer::TickEvent() {
