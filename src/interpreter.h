@@ -2993,7 +2993,7 @@ public:
         regs.ext[3] = a.Signed16();
     }
 
-private:
+public:
     CoreTiming& core_timing;
     RegisterState& regs;
     MemoryInterface& mem;

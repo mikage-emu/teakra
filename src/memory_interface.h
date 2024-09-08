@@ -64,7 +64,6 @@ public:
     u16 MMIORead(u16 address);
     void MMIOWrite(u16 address, u16 value);
 
-private:
     SharedMemory& shared_memory;
     MemoryInterfaceUnit& memory_interface_unit;
     MMIORegion* mmio;
